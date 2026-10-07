@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Query
+from fastapi import FastAPI,Query,Body
 
 app=FastAPI(title="First API") 
 
@@ -31,3 +31,16 @@ def get_post(id:int,get_content:bool=Query(default=True,description="Parametro p
                 data=post  
             return {"data":data} 
     return {"data":"Post no encontrado"}
+
+@app.post("/post")
+def create_post(post:dict=Body(...)):
+    if "title" not in post or "content" not in post: 
+        respuesta={"error":"el post debe contener titulo y contenido"} 
+    elif not str(post["title"]).strip():  
+        respuesta={"error":"el titulo no puede estar vacio"}
+
+    else:  
+        new_id=len(BLOG_APP)+1 
+        post["id"]=new_id 
+        BLOG_APP.append(post) 
+        respuesta={"message":"el post se ha creado exitosamente"}
