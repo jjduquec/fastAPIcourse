@@ -20,3 +20,14 @@ def list_posts(query:str|None=Query(default=None,description="Parametro para bus
         return {"data":results}
     else:
         return {"data":BLOG_APP}
+
+@app.get("/post/{id}")
+def get_post(id:int,get_content:bool=Query(default=True,description="Parametro para recuperar o no el contenido de un post")):
+    for post in BLOG_APP:  
+        if post["id"]==id:  
+            if not get_content: 
+                data={"id":post["id"],"title":post["title"]} 
+            else: 
+                data=post  
+            return {"data":data} 
+    return {"data":"Post no encontrado"}
