@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Query,Body
+from fastapi import FastAPI,Query,Body,HTTPException
 
 app=FastAPI(title="First API") 
 
@@ -46,3 +46,13 @@ def create_post(post:dict=Body(...)):
         respuesta={"message":"el post se ha creado exitosamente","id":new_id}
 
     return respuesta
+
+
+@app.put("/post/{post_id}")
+def update_post(post_id:int,data:dict=Body(...)): 
+    for post in BLOG_APP:  
+        if post["id"]==post_id: 
+            if "title" in data : post["title"]=data["title"]
+            if "content" in data: post["content"]=data["content"] 
+            return {"message":"post actualizado exitosamente","post":post} 
+    raise HTTPException(status_code=404,detail="post not found")
