@@ -22,7 +22,7 @@ def list_posts(query:str|None=Query(default=None,description="Parametro para bus
         return {"data":BLOG_APP}
 
 @app.get("/post/{id}")
-def get_post(id:int,get_content:bool=Query(default=True,description="Parametro para recuperar o no el contenido de un post")):
+def get_post(id:int,get_content:bool=Query(default=False,description="Parametro para recuperar o no el contenido de un post")):
     for post in BLOG_APP:  
         if post["id"]==id:  
             if not get_content: 
@@ -43,4 +43,6 @@ def create_post(post:dict=Body(...)):
         new_id=len(BLOG_APP)+1 
         post["id"]=new_id 
         BLOG_APP.append(post) 
-        respuesta={"message":"el post se ha creado exitosamente"}
+        respuesta={"message":"el post se ha creado exitosamente","id":new_id}
+
+    return respuesta
