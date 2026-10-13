@@ -56,3 +56,12 @@ def update_post(post_id:int,data:dict=Body(...)):
             if "content" in data: post["content"]=data["content"] 
             return {"message":"post actualizado exitosamente","post":post} 
     raise HTTPException(status_code=404,detail="post not found")
+
+
+@app.delete("/post/{post_id}",status_code=204) 
+def delete_post(post_id:int):  
+    for index,post in enumerate(BLOG_APP):  
+        if post["id"]==post_id:
+            BLOG_APP.pop(index)
+            return 
+    raise HTTPException(status_code=404,detail="post not found")
