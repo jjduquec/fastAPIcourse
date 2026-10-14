@@ -1,4 +1,5 @@
 from fastapi import FastAPI,Query,Body,HTTPException
+from pydantic import BaseModel
 
 app=FastAPI(title="First API") 
 
@@ -7,6 +8,17 @@ BLOG_APP=[
     {"id":2,"title":"mi segundo post","content":"este es mi segundo post"},
     {"id":3,"title":"mi tercer post","content":"este es mi tercer post"},
 ]
+
+class PostBase(BaseModel):
+    title:str  
+    content:str 
+
+class PostCreate(PostBase):
+    pass  
+
+class PostUpdate(BaseModel):
+    title:str  
+    content:str  
 
 
 @app.get("/")
@@ -33,25 +45,22 @@ def get_post(id:int,get_content:bool=Query(default=False,description="Parametro 
     return {"data":"Post no encontrado"}
 
 @app.post("/post")
-def create_post(post:dict=Body(...)):
-    if "title" not in post or "content" not in post: 
-        respuesta={"error":"el post debe contener titulo y contenido"} 
-    elif not str(post["title"]).strip():  
-        respuesta={"error":"el titulo no puede estar vacio"}
-
-    else:  
-        new_id=len(BLOG_APP)+1 
-        post["id"]=new_id 
-        BLOG_APP.append(post) 
-        respuesta={"message":"el post se ha creado exitosamente","id":new_id}
+def create_post(post:PostCreate): 
+    
+    
+    new_id=len(BLOG_APP)+1 
+    post["id"]=new_id 
+    BLOG_APP.append(post) 
+    respuesta={"message":"el post se ha creado exitosamente","id":new_id}
 
     return respuesta
-
+    
 
 @app.put("/post/{post_id}")
-def update_post(post_id:int,data:dict=Body(...)): 
+def update_post(post_id:int,data:PostUpdate): 
     for post in BLOG_APP:  
         if post["id"]==post_id: 
+            playload=data.model_dump(exclude_unset=True)
             if "title" in data : post["title"]=data["title"]
             if "content" in data: post["content"]=data["content"] 
             return {"message":"post actualizado exitosamente","post":post} 
