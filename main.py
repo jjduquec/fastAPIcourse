@@ -49,8 +49,8 @@ def create_post(post:PostCreate):
     
     
     new_id=len(BLOG_APP)+1 
-    post["id"]=new_id 
-    BLOG_APP.append(post) 
+    new_post={"id":new_id,"title":post.title,"content":post.content}
+    BLOG_APP.append(new_post) 
     respuesta={"message":"el post se ha creado exitosamente","id":new_id}
 
     return respuesta
