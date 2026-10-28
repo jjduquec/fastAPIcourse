@@ -1,5 +1,6 @@
 from fastapi import FastAPI,Query,Body,HTTPException
 from pydantic import BaseModel
+from typing import Optional
 
 app=FastAPI(title="First API") 
 
@@ -11,14 +12,14 @@ BLOG_APP=[
 
 class PostBase(BaseModel):
     title:str  
-    content:str 
+    content:Optional[str]=None
 
 class PostCreate(PostBase):
     pass  
 
 class PostUpdate(BaseModel):
     title:str  
-    content:str  
+    content:Optional[str]=None  
 
 
 @app.get("/")
@@ -60,9 +61,9 @@ def create_post(post:PostCreate):
 def update_post(post_id:int,data:PostUpdate): 
     for post in BLOG_APP:  
         if post["id"]==post_id: 
-            playload=data.model_dump(exclude_unset=True)
-            if "title" in data : post["title"]=data["title"]
-            if "content" in data: post["content"]=data["content"] 
+            payload=data.model_dump(exclude_unset=True)
+            if "title" in payload: post["title"]=payload["title"]
+            if "content" in payload: post["content"]=payload["content"]
             return {"message":"post actualizado exitosamente","post":post} 
     raise HTTPException(status_code=404,detail="post not found")
 
