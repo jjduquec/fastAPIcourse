@@ -1,5 +1,5 @@
 from fastapi import FastAPI,Query,Body,HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel,Field,field_validator
 from typing import Optional
 
 app=FastAPI(title="First API") 
@@ -15,7 +15,26 @@ class PostBase(BaseModel):
     content:Optional[str]=None
 
 class PostCreate(PostBase):
-    pass  
+    title:str=Field(
+        ..., #hace que el campo sea obligatorio
+        min_length=10,
+        max_length=100,
+        examples=["el titulo debe contener entre 10 y 100 palabras"]
+    )
+    content:Optional[str]=Field(
+        min_length=10,
+        max_length=500,
+        examples=["el contenido debe tener entre 10 y 500 palabras"] 
+    )
+
+    @field_validator("title")
+    @classmethod 
+    def not_allowed_titles_content(cls,value:str)->str:  
+        if "spam" in value.lower(): 
+            raise ValueError("El titulo no puede contener la palabra spam")
+        return value 
+        
+
 
 class PostUpdate(BaseModel):
     title:str  
