@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Query,Body,HTTPException
 from pydantic import BaseModel,Field,field_validator
-from typing import Optional
+from typing import Optional,List
 
 app=FastAPI(title="First API") 
 
@@ -34,7 +34,12 @@ class PostCreate(PostBase):
             raise ValueError("El titulo no puede contener la palabra spam")
         return value 
         
+class PostPublic(PostBase): 
+    id:int  
 
+class PostSummary(BaseModel):  
+    id:int  
+    title:str   
 
 class PostUpdate(BaseModel):
     title:str  
@@ -45,13 +50,13 @@ class PostUpdate(BaseModel):
 def home():
     return {'message':'Hello World from FastAPI'} 
 
-@app.get("/posts")
+@app.get("/posts",response_model=List[PostPublic])
 def list_posts(query:str|None=Query(default=None,description="Parametro para buscar blogs")):  
     if query:  
         results=[post for post in BLOG_APP if query.lower() in post['title'].lower()]
-        return {"data":results}
+        return results
     else:
-        return {"data":BLOG_APP}
+        return BLOG_APP
 
 @app.get("/post/{id}")
 def get_post(id:int,get_content:bool=Query(default=False,description="Parametro para recuperar o no el contenido de un post")):
