@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Query,Body,HTTPException
 from pydantic import BaseModel,Field,field_validator
-from typing import Optional,List
+from typing import Optional,List,Union
 
 app=FastAPI(title="First API") 
 
@@ -12,7 +12,7 @@ BLOG_APP=[
 
 class PostBase(BaseModel):
     title:str  
-    content:Optional[str]=None
+    content:str 
 
 class PostCreate(PostBase):
     title:str=Field(
@@ -58,16 +58,16 @@ def list_posts(query:str|None=Query(default=None,description="Parametro para bus
     else:
         return BLOG_APP
 
-@app.get("/post/{id}")
+@app.get("/post/{id}",response_model=Union[PostSummary,PostPublic],response_description="Post encontrado")
 def get_post(id:int,get_content:bool=Query(default=False,description="Parametro para recuperar o no el contenido de un post")):
     for post in BLOG_APP:  
         if post["id"]==id:  
             if not get_content: 
-                data={"id":post["id"],"title":post["title"]} 
+                return {"id":post["id"],"title":post["title"]} 
             else: 
-                data=post  
-            return {"data":data} 
-    return {"data":"Post no encontrado"}
+                return post  
+            
+    raise HTTPException(status_code=404,detail="Post no encontrado")
 
 @app.post("/post")
 def create_post(post:PostCreate): 
