@@ -69,26 +69,25 @@ def get_post(id:int,get_content:bool=Query(default=False,description="Parametro 
             
     raise HTTPException(status_code=404,detail="Post no encontrado")
 
-@app.post("/post")
+@app.post("/post",response_model=PostSummary,response_description="El post se ha creado exitosamente")
 def create_post(post:PostCreate): 
-    
     
     new_id=len(BLOG_APP)+1 
     new_post={"id":new_id,"title":post.title,"content":post.content}
     BLOG_APP.append(new_post) 
-    respuesta={"message":"el post se ha creado exitosamente","id":new_id}
-
-    return respuesta
     
 
-@app.put("/post/{post_id}")
+    return new_post
+    
+
+@app.put("/post/{post_id}",response_model=PostUpdate,response_description="El post ha sido actualizado")
 def update_post(post_id:int,data:PostUpdate): 
     for post in BLOG_APP:  
         if post["id"]==post_id: 
             payload=data.model_dump(exclude_unset=True)
             if "title" in payload: post["title"]=payload["title"]
             if "content" in payload: post["content"]=payload["content"]
-            return {"message":"post actualizado exitosamente","post":post} 
+            return post
     raise HTTPException(status_code=404,detail="post not found")
 
 
@@ -97,5 +96,5 @@ def delete_post(post_id:int):
     for index,post in enumerate(BLOG_APP):  
         if post["id"]==post_id:
             BLOG_APP.pop(index)
-            return 
+            return {"message":"El post se ha eliminado"}
     raise HTTPException(status_code=404,detail="post not found")
