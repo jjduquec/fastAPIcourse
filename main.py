@@ -10,6 +10,13 @@ BLOG_APP=[
     {"id":3,"title":"mi tercer post","content":"este es mi tercer post"},
 ]
 
+class Tag(BaseModel):
+    name:str=Field(
+        ...,
+        min_length=4,
+        max_length=20
+    )
+
 class PostBase(BaseModel):
     title:str  
     content:str 
@@ -26,6 +33,8 @@ class PostCreate(PostBase):
         max_length=500,
         examples=["el contenido debe tener entre 10 y 500 palabras"] 
     )
+
+    tags:Optional[List[Tag]]
 
     @field_validator("title")
     @classmethod 
@@ -73,7 +82,7 @@ def get_post(id:int,get_content:bool=Query(default=False,description="Parametro 
 def create_post(post:PostCreate): 
     
     new_id=len(BLOG_APP)+1 
-    new_post={"id":new_id,"title":post.title,"content":post.content}
+    new_post={"id":new_id,"title":post.title,"content":post.content,"tags":[tag.model_dump() for tag in post.tags]}
     BLOG_APP.append(new_post) 
     
 
