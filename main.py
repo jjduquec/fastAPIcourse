@@ -1,5 +1,5 @@
 from fastapi import FastAPI,Query,Body,HTTPException
-from pydantic import BaseModel,Field,field_validator
+from pydantic import BaseModel,Field,field_validator,EmailStr
 from typing import Optional,List,Union
 
 app=FastAPI(title="First API") 
@@ -17,25 +17,32 @@ class Tag(BaseModel):
         max_length=20
     )
 
+class Author(BaseModel): 
+    name:str 
+    email:EmailStr
+
 class PostBase(BaseModel):
     title:str  
     content:str 
+    tags:Optional[List[Tag]]=[]
+    author:Optional[Author]=None
 
 class PostCreate(PostBase):
     title:str=Field(
         ..., #hace que el campo sea obligatorio
-        min_length=10,
+        min_length=4,
         max_length=100,
         examples=["el titulo debe contener entre 10 y 100 palabras"]
     )
     content:Optional[str]=Field(
-        min_length=10,
+        min_length=4,
         max_length=500,
         examples=["el contenido debe tener entre 10 y 500 palabras"] 
     )
 
-    tags:Optional[List[Tag]]
-
+    tags:List[Tag]=[]
+    author:Optional[Author]=None
+ 
     @field_validator("title")
     @classmethod 
     def not_allowed_titles_content(cls,value:str)->str:  
@@ -82,7 +89,12 @@ def get_post(id:int,get_content:bool=Query(default=False,description="Parametro 
 def create_post(post:PostCreate): 
     
     new_id=len(BLOG_APP)+1 
-    new_post={"id":new_id,"title":post.title,"content":post.content,"tags":[tag.model_dump() for tag in post.tags]}
+    new_post={"id":new_id,
+              "title":post.title,
+              "content":post.content,
+              "tags":[tag.model_dump() for tag in post.tags],
+              "author": post.author.model_dump() if post.author else None
+              }
     BLOG_APP.append(new_post) 
     
 
@@ -96,6 +108,7 @@ def update_post(post_id:int,data:PostUpdate):
             payload=data.model_dump(exclude_unset=True)
             if "title" in payload: post["title"]=payload["title"]
             if "content" in payload: post["content"]=payload["content"]
+            if "author" in payload: post["author"]=payload["author"].model_dump()
             return post
     raise HTTPException(status_code=404,detail="post not found")
 
