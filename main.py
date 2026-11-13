@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Query,Body,HTTPException
+from fastapi import FastAPI,Query,Body,HTTPException,Path
 from pydantic import BaseModel,Field,field_validator,EmailStr
 from typing import Optional,List,Union
 
@@ -79,7 +79,13 @@ def list_posts(query:str|None=Query(default=None,description="Parametro para bus
         return BLOG_APP
 
 @app.get("/post/{id}",response_model=Union[PostSummary,PostPublic],response_description="Post encontrado")
-def get_post(id:int,get_content:bool=Query(default=False,description="Parametro para recuperar o no el contenido de un post")):
+def get_post(id:int=Path(
+    ...,
+    ge=1,  
+    description="El id debe ser mayor o igual a 1",
+    example=1 
+    ),
+    get_content:bool=Query(default=False,description="Parametro para recuperar o no el contenido de un post")):
     for post in BLOG_APP:  
         if post["id"]==id:  
             if not get_content: 
