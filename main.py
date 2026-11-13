@@ -24,7 +24,7 @@ class Author(BaseModel):
 class PostBase(BaseModel):
     title:str  
     content:str 
-    tags:Optional[List[Tag]]=[]
+    tags:Optional[List[Tag]]=Field(default_factory=list)
     author:Optional[Author]=None
 
 class PostCreate(PostBase):
@@ -58,7 +58,11 @@ class PostSummary(BaseModel):
     title:str   
 
 class PostUpdate(BaseModel):
-    title:str  
+    title:Optional[str]=Field(
+        None,
+        min_length=3,  
+        max_length=500
+    ) 
     content:Optional[str]=None  
 
 
