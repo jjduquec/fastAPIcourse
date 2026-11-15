@@ -71,7 +71,13 @@ def home():
     return {'message':'Hello World from FastAPI'} 
 
 @app.get("/posts",response_model=List[PostPublic])
-def list_posts(query:str|None=Query(default=None,description="Parametro para buscar blogs")):  
+def list_posts(query:Optional[str]|None=Query(
+    default=None,
+    description="Parametro para buscar blogs",
+    alias="search",
+    min_length=2,
+    max_length=100
+    )):  
     if query:  
         results=[post for post in BLOG_APP if query.lower() in post['title'].lower()]
         return results
