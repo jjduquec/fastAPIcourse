@@ -65,12 +65,17 @@ class PostUpdate(BaseModel):
     ) 
     content:Optional[str]=None  
 
+class PaginatedPost(BaseModel): 
+    total:int
+    limit:int
+    offset:int
+    items:List[PostPublic]
 
 @app.get("/")
 def home():
     return {'message':'Hello World from FastAPI'} 
 
-@app.get("/posts",response_model=List[PostPublic])
+@app.get("/posts",response_model=PaginatedPost)
 def list_posts(query:Optional[str]|None=Query(
     default=None,
     description="Parametro para buscar blogs",
@@ -107,8 +112,10 @@ def list_posts(query:Optional[str]|None=Query(
     if query:  
         results=[post for post in BLOG_APP if query.lower() in post['title'].lower()]
         results=sorted(results,key=lambda post:post[order_by],reverse=(direction=="desc"))
+    total=len(results)
+    items=results[offset:offset+limit]
 
-    return results[offset:offset+limit]  
+    return PaginatedPost(total=total,limit=limit,offset=offset,items=items)
 
 @app.get("/post/{id}",response_model=Union[PostSummary,PostPublic],response_description="Post encontrado")
 def get_post(id:int=Path(
